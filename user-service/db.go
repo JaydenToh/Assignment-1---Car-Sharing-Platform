@@ -15,7 +15,7 @@ func initDB() {
 		os.Getenv("root"),
 		os.Getenv("30G776292t05"),
 		os.Getenv("localhost"),
-		os.Getenv("car_sharing"),
+		os.Getenv("my_db"),
 	)
 
 	db, err = sql.Open("mysql", dsn)
