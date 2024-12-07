@@ -14,12 +14,12 @@ func initDB() {
 
 	// Configure the DSN (Data Source Name)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s",
-		os.Getenv("DB_USER"),     // Database user
-		os.Getenv("DB_PASSWORD"), // Database password
-		os.Getenv("DB_HOST"),     // Database host
-		os.Getenv("DB_NAME"),     // Database name
+		os.Getenv("root"),     // Database user
+		os.Getenv("30G776292t05"), // Database password
+		os.Getenv("localhost"),     // Database host
+		os.Getenv("my_db"),     // Database name
 	)
-
+ 
 	// Open a connection to the database
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
