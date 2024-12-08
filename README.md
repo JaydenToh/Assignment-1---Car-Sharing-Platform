@@ -25,11 +25,15 @@ The design system uses a microservice architecture to handle vehicle management 
 
 #2 Achitecture Diagram
 
+![image](https://github.com/user-attachments/assets/bdf90a11-374a-4f9b-9979-aa39ce6d92c2)
 
 #3 Setup and Running Instructions
-Step 1 - Clone the github repository
-Step 2 - Set up the database in MYSQL Workbench
-         Create database for each services for users, reservations, vehicle, billing
+
+Step 1 - Clone the github repository.
+
+Step 2 - Set up the database in MYSQL Workbench.
+         Create database for each services for users, reservations, vehicle, billing.
+
 Step 3 - Run each back end Services:
          - User Service
            cd user-service
@@ -39,12 +43,12 @@ Step 3 - Run each back end Services:
            go run main.go
          - Billing Service
            cd billing-service
-           go run main.go
+           go run main.go.
 
 Step 4 - Run front end:
          cd frontend
          npm install
-         npm run dev
+         npm run dev.
 
 Step 5 - Testing:
          http://localhost:5173
