@@ -3,7 +3,7 @@
 
 Creating a car sharing platform in Go
 
-#1 Design Considerations
+#1 Design Considerations:
 The design system uses a microservice architecture to handle vehicle management efficiently. Each service that I have created plays a part to ensure the scalability and reliability of the system.
 
 - Service Seperation:
@@ -11,16 +11,16 @@ The design system uses a microservice architecture to handle vehicle management 
   User Service: Manages user profiles and membership tiers
   Billing Service: Calculates the membership tiers cost and handles billing-related task
 
-- RESTful APIs
+- RESTful APIs:
   To connect the back end together with the front end.
 
-- Script
+- Script:
   One MySQL query to store the structured data of the tables created in the database.
 
-- Database
+- Database:
   Services have a seperate database folder db.go so that there will not be conflict errors.
 
-- Error Handling
+- Error Handling:
   Each services includes error handling with descriptive http status codes so errors can be fixed.
 
 #2 Achitecture Diagram
