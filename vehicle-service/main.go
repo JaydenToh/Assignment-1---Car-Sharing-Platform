@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"vehicle-service/database"
 	"vehicle-service/handlers"
 
+	gorillahandlers "github.com/gorilla/handlers" // Import CORS handlers package
 	"github.com/gorilla/mux"
 )
 
@@ -24,7 +26,12 @@ func main() {
 	router.HandleFunc("/modify-booking", handlers.ModifyBooking).Methods("PUT")
 	router.HandleFunc("/cancel-booking", handlers.CancelBooking).Methods("DELETE")
 
-	// Start the HTTP server
+	// Define CORS options
+	corsOptions := gorillahandlers.AllowedOrigins([]string{"http://localhost:5173"}) // Replace with your frontend URL
+	corsMethods := gorillahandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	corsHeaders := gorillahandlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+
+	// Start the HTTP server with CORS
 	log.Println("Vehicle Service is running on port 8002")
-	log.Fatal(http.ListenAndServe(":8002", router))
+	log.Fatal(http.ListenAndServe(":8002", gorillahandlers.CORS(corsOptions, corsMethods, corsHeaders)(router)))
 }
