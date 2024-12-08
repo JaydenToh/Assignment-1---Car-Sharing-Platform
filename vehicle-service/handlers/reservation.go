@@ -17,6 +17,38 @@ func InitReservationHandler(database *sql.DB) {
 	dbReservation = database
 }
 
+func FetchAvailableVehicles(w http.ResponseWriter, r *http.Request) {
+    rows, err := dbReservation.Query("SELECT ID, Model, Status FROM my_db.vehicles WHERE Status = ?", "available")
+    if err != nil {
+        http.Error(w, "Failed to fetch available vehicles", http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    var vehicles []map[string]interface{}
+    for rows.Next() {
+        var id, model, status string
+        if err := rows.Scan(&id, &model, &status); err != nil {
+            http.Error(w, "Error scanning vehicles", http.StatusInternalServerError)
+            return
+        }
+        vehicles = append(vehicles, map[string]interface{}{
+            "id":     id,
+            "model":  model,
+            "status": status,
+        })
+    }
+
+    if len(vehicles) == 0 {
+        http.Error(w, "No available vehicles found", http.StatusNotFound)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(vehicles)
+}
+
+
 // CheckAvailability checks vehicle availability
 func CheckAvailability(w http.ResponseWriter, r *http.Request) {
 	var request struct {
@@ -169,7 +201,6 @@ func ModifyBooking(w http.ResponseWriter, r *http.Request) {
 
 // CancelBooking cancels a reservation
 func CancelBooking(w http.ResponseWriter, r *http.Request) {
-    // Parse the request body
     var request struct {
         ReservationID string `json:"reservation_id"`
     }
@@ -179,34 +210,41 @@ func CancelBooking(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Retrieve vehicle ID from the reservation
+    if request.ReservationID == "" {
+        http.Error(w, "Reservation ID is required", http.StatusBadRequest)
+        return
+    }
+
     var vehicleID string
     err = dbReservation.QueryRow(
-        "SELECT VehicleID FROM reservations WHERE ID = ?",
+        "SELECT VehicleID FROM my_db.reservations WHERE ID = ?",
         request.ReservationID,
     ).Scan(&vehicleID)
     if err != nil {
-        http.Error(w, "Failed to find reservation: "+err.Error(), http.StatusNotFound)
+        if err == sql.ErrNoRows {
+            http.Error(w, "Reservation not found", http.StatusNotFound)
+        } else {
+            http.Error(w, "Failed to retrieve reservation: "+err.Error(), http.StatusInternalServerError)
+        }
         return
     }
 
-    // Delete the reservation
-    _, err = dbReservation.Exec("DELETE FROM reservations WHERE ID = ?", request.ReservationID)
+    _, err = dbReservation.Exec("DELETE FROM my_db.reservations WHERE ID = ?", request.ReservationID)
     if err != nil {
-        http.Error(w, "Failed to cancel reservation", http.StatusInternalServerError)
+        http.Error(w, "Failed to cancel reservation: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
-    // Update vehicle status to "available"
-    _, err = dbReservation.Exec("UPDATE vehicles SET Status = 'available' WHERE ID = ?", vehicleID)
+    _, err = dbReservation.Exec("UPDATE my_db.vehicles SET Status = 'available' WHERE ID = ?", vehicleID)
     if err != nil {
-        http.Error(w, "Failed to update vehicle status", http.StatusInternalServerError)
+        http.Error(w, "Failed to update vehicle status: "+err.Error(), http.StatusInternalServerError)
         return
     }
 
-    // Success response
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(map[string]string{
         "message": "Reservation cancelled successfully!",
     })
 }
+
+  

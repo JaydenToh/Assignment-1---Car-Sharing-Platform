@@ -1,46 +1,112 @@
-const BASE_URL_USER = "http://localhost:8000";
 const BASE_URL_VEHICLE = "http://localhost:8002";
-const BASE_URL_BILLING = "http://localhost:8001";
 
-// User Service API
-export const fetchUserProfile = async () => {
-  const response = await fetch(`${BASE_URL_USER}/membership-status`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch user profile");
-  }
-  return response.json();
+// Helper function to format datetime into "YYYY-MM-DD HH:mm:ss"
+const formatDateTime = (date) => {
+  const pad = (n) => (n < 10 ? `0${n}` : n);
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+    date.getSeconds()
+  )}`;
 };
 
-export const fetchRentalHistory = async () => {
-  const response = await fetch(`${BASE_URL_USER}/rental-history`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch rental history");
-  }
-  return response.json();
-};
-
-// Vehicle Service API
-export const fetchReservations = async () => {
-  const response = await fetch(`${BASE_URL_VEHICLE}/check-availability`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch reservations");
-  }
-  return response.json();
-};
-
+// Fetch all vehicles
 export const fetchVehicles = async () => {
-  const response = await fetch(`${BASE_URL_VEHICLE}/check-availability`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch vehicles");
+  try {
+    const response = await fetch(`${BASE_URL_VEHICLE}/get-vehicles`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch vehicles: ${response.statusText}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error fetching vehicles:", error);
+    throw error;
   }
-  return response.json();
 };
 
-// Billing Service API
-export const fetchBilling = async () => {
-  const response = await fetch(`${BASE_URL_BILLING}/calculate-billing`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch billing details");
+// Book a vehicle
+export const bookVehicle = async (vehicleId, userId, startTime, endTime) => {
+  try {
+    const response = await fetch(`${BASE_URL_VEHICLE}/book-vehicle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        vehicle_id: vehicleId,
+        user_id: userId,
+        start_time: formatDateTime(new Date(startTime)),
+        end_time: formatDateTime(new Date(endTime)),
+      }),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to book vehicle: ${response.statusText} - ${errorText}`
+      );
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error booking vehicle:", error);
+    throw error;
   }
-  return response.json();
+};
+
+// Modify a booking
+export const modifyBooking = async (reservationId, startTime, endTime) => {
+  try {
+    const response = await fetch(`${BASE_URL_VEHICLE}/modify-booking`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+        start_time: formatDateTime(new Date(startTime)),
+        end_time: formatDateTime(new Date(endTime)),
+      }),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to modify booking: ${response.statusText} - ${errorText}`
+      );
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Error modifying booking:", error);
+    throw error;
+  }
+};
+
+// Cancel a booking
+export const cancelBooking = async (reservationId) => {
+  if (!reservationId || reservationId.trim() === "") {
+    throw new Error("Reservation ID is required to cancel a booking.");
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL_VEHICLE}/cancel-booking`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reservation_id: reservationId,
+      }),
+    });
+
+    if (!response.ok) {
+      // Attempt to retrieve additional error details from the response body
+      const errorText = await response.text();
+      throw new Error(
+        `Failed to cancel booking: ${response.statusText} - ${errorText}`
+      );
+    }
+
+    // Return JSON response
+    return await response.json();
+  } catch (error) {
+    console.error("Error canceling booking:", error);
+    throw error;
+  }
 };

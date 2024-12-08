@@ -1,26 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { fetchReservations, fetchVehicles, fetchBilling } from "./utils/api";
+import {
+  fetchVehicles,
+  bookVehicle,
+  modifyBooking,
+  cancelBooking,
+} from "./utils/api";
+import "./styles.css";
 
-function HomePage() {
-  const [reservations, setReservations] = useState([]);
+function VehicleManagement() {
   const [vehicles, setVehicles] = useState([]);
-  const [billing, setBilling] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch vehicles on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [resResponse, vehResponse, billResponse] = await Promise.all([
-          fetchReservations(),
-          fetchVehicles(),
-          fetchBilling(),
-        ]);
-
-        setReservations(resResponse);
-        setVehicles(vehResponse);
-        setBilling(billResponse);
+        const vehicleData = await fetchVehicles();
+        setVehicles(vehicleData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching vehicles:", error);
+        alert("Failed to fetch vehicles. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -29,44 +28,78 @@ function HomePage() {
     fetchData();
   }, []);
 
+  // Book a vehicle
+  const handleBookVehicle = async () => {
+    const vehicleId = prompt("Enter vehicle ID to book:");
+    const userId = prompt("Enter your User ID:");
+    const startTime = prompt("Enter start time (YYYY-MM-DD HH:MM:SS):");
+    const endTime = prompt("Enter end time (YYYY-MM-DD HH:MM:SS):");
+
+    if (!vehicleId || !userId || !startTime || !endTime) {
+      alert("All fields are required to book a vehicle.");
+      return;
+    }
+
+    try {
+      const response = await bookVehicle(vehicleId, userId, startTime, endTime);
+      alert(`Vehicle booked successfully: ${response.message}`);
+    } catch (error) {
+      console.error("Error booking vehicle:", error);
+      alert(`Error booking vehicle: ${error.message}`);
+    }
+  };
+
+  // Modify a booking
+  const handleModifyBooking = async () => {
+    const reservationId = prompt("Enter reservation ID to modify:");
+    const newStartTime = prompt("Enter new start time (YYYY-MM-DD HH:MM:SS):");
+    const newEndTime = prompt("Enter new end time (YYYY-MM-DD HH:MM:SS):");
+
+    if (!reservationId || !newStartTime || !newEndTime) {
+      alert("All fields are required to modify a booking.");
+      return;
+    }
+
+    try {
+      const response = await modifyBooking(
+        reservationId,
+        newStartTime,
+        newEndTime
+      );
+      alert(`Booking modified successfully: ${response.message}`);
+    } catch (error) {
+      console.error("Error modifying booking:", error);
+      alert(`Error modifying booking: ${error.message}`);
+    }
+  };
+
+  // Cancel a booking
+  const handleCancelBooking = async () => {
+    const reservationId = prompt("Enter reservation ID to cancel:");
+
+    if (!reservationId) {
+      alert("Reservation ID is required to cancel a booking.");
+      return;
+    }
+
+    try {
+      const response = await cancelBooking(reservationId);
+      alert(`Booking canceled successfully: ${response.message}`);
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert(`Error canceling booking: ${error.message}`);
+    }
+  };
+
   if (loading) {
-    return <div>Loading data...</div>;
+    return <div>Loading vehicles...</div>;
   }
 
   return (
-    <div>
-      <h1>Car Sharing Platform - Dashboard</h1>
-
-      {/* Reservations Section */}
+    <div className="container">
+      <h1>Vehicle Management</h1>
       <section>
-        <h2>Reservations</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User ID</th>
-              <th>Vehicle ID</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((res) => (
-              <tr key={res.id}>
-                <td>{res.id}</td>
-                <td>{res.userId}</td>
-                <td>{res.vehicleId}</td>
-                <td>{res.startTime}</td>
-                <td>{res.endTime}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      {/* Vehicles Section */}
-      <section>
-        <h2>Vehicles</h2>
+        <h2>Available Vehicles</h2>
         <table>
           <thead>
             <tr>
@@ -76,45 +109,23 @@ function HomePage() {
             </tr>
           </thead>
           <tbody>
-            {vehicles.map((veh) => (
-              <tr key={veh.id}>
-                <td>{veh.id}</td>
-                <td>{veh.model}</td>
-                <td>{veh.status}</td>
+            {vehicles.map((vehicle) => (
+              <tr key={vehicle.id}>
+                <td>{vehicle.id}</td>
+                <td>{vehicle.model}</td>
+                <td>{vehicle.status}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </section>
-
-      {/* Billing Section */}
-      <section>
-        <h2>Billing Details</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Reservation ID</th>
-              <th>Amount</th>
-              <th>Membership Tier</th>
-              <th>Hourly Rate</th>
-              <th>Discount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billing.map((bill) => (
-              <tr key={bill.id}>
-                <td>{bill.reservationId}</td>
-                <td>{bill.amount}</td>
-                <td>{bill.membershipTier}</td>
-                <td>{bill.hourlyRate}</td>
-                <td>{bill.discountPercentage}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="buttons">
+          <button onClick={handleBookVehicle}>Book Vehicle</button>
+          <button onClick={handleModifyBooking}>Modify Booking</button>
+          <button onClick={handleCancelBooking}>Cancel Booking</button>
+        </div>
       </section>
     </div>
   );
 }
 
-export default HomePage;
+export default VehicleManagement;

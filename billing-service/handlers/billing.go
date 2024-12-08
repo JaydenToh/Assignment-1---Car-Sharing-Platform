@@ -19,53 +19,70 @@ func InitBillingHandler(database *sql.DB) {
 
 // CalculateBilling calculates the cost of a rental
 func CalculateBilling(w http.ResponseWriter, r *http.Request) {
-    var rental models.Rental
-    err := json.NewDecoder(r.Body).Decode(&rental)
-    if err != nil {
-        http.Error(w, "Invalid request payload", http.StatusBadRequest)
-        return
-    }
+	var rental models.Rental
+	err := json.NewDecoder(r.Body).Decode(&rental)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
 
-    // Parse start and end time
-    startTime, err := time.Parse("2006-01-02 15:04:05", rental.StartTime)
-    if err != nil {
-        http.Error(w, "Invalid start time format", http.StatusBadRequest)
-        return
-    }
-    endTime, err := time.Parse("2006-01-02 15:04:05", rental.EndTime)
-    if err != nil {
-        http.Error(w, "Invalid end time format", http.StatusBadRequest)
-        return
-    }
+	// Parse start and end time
+	startTime, err := time.Parse("2006-01-02 15:04:05", rental.StartTime)
+	if err != nil {
+		http.Error(w, "Invalid start time format", http.StatusBadRequest)
+		return
+	}
+	endTime, err := time.Parse("2006-01-02 15:04:05", rental.EndTime)
+	if err != nil {
+		http.Error(w, "Invalid end time format", http.StatusBadRequest)
+		return
+	}
 
-    // Calculate duration in hours
-    rental.Hours = endTime.Sub(startTime).Hours()
+	// Calculate duration in hours
+	rental.Hours = endTime.Sub(startTime).Hours()
 
-    // Retrieve HourlyRate and DiscountPercentage from Billing table
-    var hourlyRate float64
-    var discountPercentage float64
-    err = dbBilling.QueryRow(
-        "SELECT HourlyRate, DiscountPercentage FROM my_db.billing WHERE MembershipTier = ?",
-        rental.MembershipTier,
-    ).Scan(&hourlyRate, &discountPercentage)
-    if err != nil {
-        http.Error(w, "Failed to retrieve billing info", http.StatusInternalServerError)
-        return
-    }
+	// Retrieve HourlyRate and DiscountPercentage from Billing table
+	var hourlyRate, discountPercentage float64
+	err = dbBilling.QueryRow(
+		"SELECT HourlyRate, DiscountPercentage FROM my_db.billing WHERE MembershipTier = ?",
+		rental.MembershipTier,
+	).Scan(&hourlyRate, &discountPercentage)
+	if err != nil {
+		http.Error(w, "Failed to retrieve billing info", http.StatusInternalServerError)
+		return
+	}
 
-    // Calculate cost, discount, and total
-    rental.Cost = hourlyRate * rental.Hours
-    rental.Discount = rental.Cost * (discountPercentage / 100)
-    rental.Total = rental.Cost - rental.Discount
+	// Calculate cost, discount, and total
+	rental.Cost = hourlyRate * rental.Hours
+	rental.Discount = rental.Cost * (discountPercentage / 100)
+	rental.Total = rental.Cost - rental.Discount
 
-    // Respond with billing details
-    w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(rental)
+	// Respond with billing details
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(rental)
+}
+
+// sendEmail sends an email using MailHog
+func sendEmail(toEmail, subject, body string) error {
+	// Email configuration for MailHog
+	from := "test@example.com"
+	smtpHost := "localhost"
+	smtpPort := "1025"
+
+	// Email message
+	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
+
+	// Send the email
+	err := smtp.SendMail(smtpHost+":"+smtpPort, nil, from, []string{toEmail}, []byte(message))
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+
+	return nil
 }
 
 // EstimateBilling calculates the estimated cost based on user input
 func EstimateBilling(w http.ResponseWriter, r *http.Request) {
-	// Parse input JSON
 	var billingRequest struct {
 		MembershipTier string `json:"membership_tier"`
 		StartTime      string `json:"start_time"`
@@ -77,28 +94,33 @@ func EstimateBilling(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate MembershipTier
+	if billingRequest.MembershipTier != "Basic" && billingRequest.MembershipTier != "Premium" && billingRequest.MembershipTier != "VIP" {
+		http.Error(w, "Invalid membership tier", http.StatusBadRequest)
+		return
+	}
+
 	// Parse Start and End time
 	startTime, err := time.Parse("2006-01-02T15:04:05", billingRequest.StartTime)
 	if err != nil {
-		http.Error(w, "Invalid start time format", http.StatusBadRequest)
+		http.Error(w, "Invalid start time format. Use ISO 8601 format", http.StatusBadRequest)
 		return
 	}
 	endTime, err := time.Parse("2006-01-02T15:04:05", billingRequest.EndTime)
 	if err != nil {
-		http.Error(w, "Invalid end time format", http.StatusBadRequest)
+		http.Error(w, "Invalid end time format. Use ISO 8601 format", http.StatusBadRequest)
 		return
 	}
 
 	// Calculate duration in hours
 	duration := endTime.Sub(startTime).Hours()
-	if duration < 0 {
-		http.Error(w, "End time cannot be earlier than start time", http.StatusBadRequest)
+	if duration <= 0 {
+		http.Error(w, "End time must be after start time", http.StatusBadRequest)
 		return
 	}
 
 	// Fetch the hourly rate and discount percentage for the given membership tier
-	var hourlyRate float64
-	var discountPercentage float64
+	var hourlyRate, discountPercentage float64
 	err = dbBilling.QueryRow(
 		"SELECT HourlyRate, DiscountPercentage FROM my_db.billing WHERE MembershipTier = ?",
 		billingRequest.MembershipTier,
@@ -126,40 +148,23 @@ func EstimateBilling(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func sendEmail(toEmail, subject, body string) error {
-	// Email configuration
-	from := "your_email@example.com"       // Replace with your email
-	password := "your_email_password"      // Replace with your email password
-	smtpHost := "smtp.example.com"         // Replace with your SMTP server, e.g., smtp.gmail.com
-	smtpPort := "587"                      // Replace with your SMTP port
-
-	// Email message
-	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
-
-	// Set up authentication
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	// Send the email
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, []byte(message))
-	if err != nil {
-		return fmt.Errorf("failed to send email: %v", err)
-	}
-
-	return nil
-}
-
-/// GenerateInvoice generates an invoice and sends it via email
+// GenerateInvoice generates an invoice and sends it via email
 func GenerateInvoice(w http.ResponseWriter, r *http.Request) {
-	// Parse the input request
 	var invoiceRequest struct {
-		UserEmail   string `json:"user_email"`
-		UserID      string `json:"user_id"`
-		Reservation string `json:"reservation_id"`
-		Amount      string `json:"amount"`
+		UserEmail      string `json:"user_email"`
+		UserID         string `json:"user_id"`
+		ReservationID  string `json:"reservation_id"`
+		Amount         string `json:"amount"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&invoiceRequest)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// Validate email and amount
+	if invoiceRequest.UserEmail == "" || invoiceRequest.Amount == "" {
+		http.Error(w, "User email and amount are required", http.StatusBadRequest)
 		return
 	}
 
@@ -172,10 +177,10 @@ User ID: %s
 Total Amount: $%s
 ---------------------
 Thank you for using our service!`,
-		invoiceRequest.Reservation, invoiceRequest.UserID, invoiceRequest.Amount,
+		invoiceRequest.ReservationID, invoiceRequest.UserID, invoiceRequest.Amount,
 	)
 
-	// Send the invoice via email
+	// Send the invoice via email using MailHog
 	err = sendEmail(invoiceRequest.UserEmail, "Your Invoice", invoiceDetails)
 	if err != nil {
 		http.Error(w, "Failed to send invoice: "+err.Error(), http.StatusInternalServerError)
@@ -188,4 +193,3 @@ Thank you for using our service!`,
 		"message": "Invoice sent successfully!",
 	})
 }
-

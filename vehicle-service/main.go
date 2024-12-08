@@ -21,6 +21,7 @@ func main() {
 
 	// Create a router and define routes
 	router := mux.NewRouter()
+	router.HandleFunc("/get-vehicles", handlers.FetchAvailableVehicles).Methods("GET")
 	router.HandleFunc("/check-availability", handlers.CheckAvailability).Methods("POST")
 	router.HandleFunc("/book-vehicle", handlers.BookVehicle).Methods("POST")
 	router.HandleFunc("/modify-booking", handlers.ModifyBooking).Methods("PUT")

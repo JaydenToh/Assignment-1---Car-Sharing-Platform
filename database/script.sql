@@ -82,8 +82,22 @@ VALUES
 ('03', '03', '04', '2024-12-10 10:00:00', '2024-12-10 15:00:00');
 
 INSERT INTO Billing (ID, ReservationID, Amount)
+
 VALUES
 ('01', '01', 30.00),
 ('02', '02', 40.00),
 ('03', '03', 55.00);
+
+
+CREATE TABLE billing (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    MembershipTier VARCHAR(50) NOT NULL,
+    HourlyRate DECIMAL(10, 2) NOT NULL,
+    DiscountPercentage DECIMAL(5, 2) NOT NULL
+);
+
+INSERT INTO billing (MembershipTier, HourlyRate, DiscountPercentage) VALUES
+('Basic', 10.00, 0.00),
+('Premium', 15.00, 10.00),
+('VIP', 20.00, 20.00);
 
