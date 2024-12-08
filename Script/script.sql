@@ -22,11 +22,11 @@ CREATE TABLE Reservations (
     FOREIGN KEY (VehicleID) REFERENCES Vehicles(ID)
 );
 
-CREATE TABLE Billing (
-    ID VARCHAR(5) NOT NULL PRIMARY KEY,
-    ReservationID VARCHAR(5) NOT NULL,
-    Amount DECIMAL(10, 2),
-    FOREIGN KEY (ReservationID) REFERENCES Reservations(ID)
+CREATE TABLE billing (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    MembershipTier VARCHAR(50) NOT NULL,
+    HourlyRate DECIMAL(10, 2) NOT NULL,
+    DiscountPercentage DECIMAL(5, 2) NOT NULL
 );
 
 ALTER TABLE Billing
@@ -87,14 +87,6 @@ VALUES
 ('01', '01', 30.00),
 ('02', '02', 40.00),
 ('03', '03', 55.00);
-
-
-CREATE TABLE billing (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    MembershipTier VARCHAR(50) NOT NULL,
-    HourlyRate DECIMAL(10, 2) NOT NULL,
-    DiscountPercentage DECIMAL(5, 2) NOT NULL
-);
 
 INSERT INTO billing (MembershipTier, HourlyRate, DiscountPercentage) VALUES
 ('Basic', 10.00, 0.00),
