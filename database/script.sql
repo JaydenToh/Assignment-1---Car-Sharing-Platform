@@ -54,6 +54,11 @@ VALUES
 
 ALTER TABLE my_db.reservations MODIFY COLUMN ID VARCHAR(36);
 
+ALTER TABLE my_db.billing
+DROP FOREIGN KEY billing_ibfk_1;
+
+ALTER TABLE my_db.billing
+ADD CONSTRAINT billing_ibfk_1 FOREIGN KEY (ReservationID) REFERENCES my_db.reservations(ID) ON DELETE CASCADE;
 
 INSERT INTO Users (ID, FirstName, LastName, Email, Password)
 VALUES

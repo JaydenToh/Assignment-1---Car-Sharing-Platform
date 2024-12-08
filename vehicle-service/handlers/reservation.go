@@ -169,28 +169,44 @@ func ModifyBooking(w http.ResponseWriter, r *http.Request) {
 
 // CancelBooking cancels a reservation
 func CancelBooking(w http.ResponseWriter, r *http.Request) {
-	var cancel struct {
-		ReservationID string `json:"reservation_id"`
-	}
+    // Parse the request body
+    var request struct {
+        ReservationID string `json:"reservation_id"`
+    }
+    err := json.NewDecoder(r.Body).Decode(&request)
+    if err != nil {
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
 
-	err := json.NewDecoder(r.Body).Decode(&cancel)
-	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
+    // Retrieve vehicle ID from the reservation
+    var vehicleID string
+    err = dbReservation.QueryRow(
+        "SELECT VehicleID FROM reservations WHERE ID = ?",
+        request.ReservationID,
+    ).Scan(&vehicleID)
+    if err != nil {
+        http.Error(w, "Failed to find reservation: "+err.Error(), http.StatusNotFound)
+        return
+    }
 
-	// Delete the reservation
-	_, err = dbReservation.Exec(
-		`DELETE FROM reservations WHERE ID = ?`,
-		cancel.ReservationID,
-	)
-	if err != nil {
-		http.Error(w, "Failed to cancel reservation", http.StatusInternalServerError)
-		return
-	}
+    // Delete the reservation
+    _, err = dbReservation.Exec("DELETE FROM reservations WHERE ID = ?", request.ReservationID)
+    if err != nil {
+        http.Error(w, "Failed to cancel reservation", http.StatusInternalServerError)
+        return
+    }
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Reservation canceled successfully",
-	})
+    // Update vehicle status to "available"
+    _, err = dbReservation.Exec("UPDATE vehicles SET Status = 'available' WHERE ID = ?", vehicleID)
+    if err != nil {
+        http.Error(w, "Failed to update vehicle status", http.StatusInternalServerError)
+        return
+    }
+
+    // Success response
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "Reservation cancelled successfully!",
+    })
 }
