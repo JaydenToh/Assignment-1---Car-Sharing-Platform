@@ -52,6 +52,8 @@ VALUES
     (02, 40.00, 'Premium', 8.00, 10.00),
     (03, 55.00, 'VIP', 5.00, 20.00);
 
+ALTER TABLE my_db.reservations MODIFY COLUMN ID VARCHAR(36);
+
 
 INSERT INTO Users (ID, FirstName, LastName, Email, Password)
 VALUES

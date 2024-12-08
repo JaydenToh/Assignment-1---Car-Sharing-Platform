@@ -3,28 +3,28 @@ package main
 import (
 	"log"
 	"net/http"
+	"vehicle-service/database"
+	"vehicle-service/handlers"
 
-	"vehicle-service/handlers" // Replace with your actual module path
-
-	"github.com/gorilla/mux" // Ensure this is installed: go get github.com/gorilla/mux
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Initialize the database connection
-	initDB()
-	defer closeDB()
+	// Initialize database connection
+	database.InitDB()
+	defer database.CloseDB()
 
-	// Initialize the vehicle handlers with the database connection
-	handlers.InitVehicleHandler(db)
+	// Initialize handlers with database
+	handlers.InitReservationHandler(database.DB)
 
-	// Set up the router
+	// Create a router and define routes
 	router := mux.NewRouter()
+	router.HandleFunc("/check-availability", handlers.CheckAvailability).Methods("POST")
+	router.HandleFunc("/book-vehicle", handlers.BookVehicle).Methods("POST")
+	router.HandleFunc("/modify-booking", handlers.ModifyBooking).Methods("PUT")
+	router.HandleFunc("/cancel-booking", handlers.CancelBooking).Methods("DELETE")
 
-	// Define routes for Vehicle Service
-	router.HandleFunc("/vehicles", handlers.GetAvailableVehicles).Methods("GET")
-	router.HandleFunc("/reserve", handlers.ReserveVehicle).Methods("POST")
-
-	// Start the server
-	log.Println("Vehicle Service running on port 8001")
-	log.Fatal(http.ListenAndServe(":8001", router))
+	// Start the HTTP server
+	log.Println("Vehicle Service is running on port 8002")
+	log.Fatal(http.ListenAndServe(":8002", router))
 }
