@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/smtp"
 	"time"
 )
 
@@ -62,24 +61,18 @@ func CalculateBilling(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(rental)
 }
 
-// sendEmail sends an email using MailHog
 func sendEmail(toEmail, subject, body string) error {
-	// Email configuration for MailHog
-	from := "test@example.com"
-	smtpHost := "localhost"
-	smtpPort := "1025"
+	
+	fmt.Println("=== Simulated Email ===")
+	fmt.Printf("To: %s\n", toEmail)
+	fmt.Printf("Subject: %s\n", subject)
+	fmt.Printf("Body:\n%s\n", body)
+	fmt.Println("========================")
 
-	// Email message
-	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
-
-	// Send the email
-	err := smtp.SendMail(smtpHost+":"+smtpPort, nil, from, []string{toEmail}, []byte(message))
-	if err != nil {
-		return fmt.Errorf("failed to send email: %v", err)
-	}
-
+	// Simulate success
 	return nil
 }
+
 
 // EstimateBilling calculates the estimated cost based on user input
 func EstimateBilling(w http.ResponseWriter, r *http.Request) {
