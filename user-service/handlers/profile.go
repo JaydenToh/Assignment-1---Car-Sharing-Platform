@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -63,12 +64,21 @@ func GetMembershipStatus(w http.ResponseWriter, r *http.Request) {
 
 // GetRentalHistory retrieves the user's rental history
 func GetRentalHistory(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("id")
+	userID := r.URL.Query().Get("id") // Extract user ID from query params
+	log.Printf("Fetching rental history for user ID: %s", userID)
+
+	// Validate user ID
+	if userID == "" {
+		http.Error(w, "User ID is required", http.StatusBadRequest)
+		return
+	}
+
 	rows, err := dbProfile.Query(
-		"SELECT VehicleID, StartDate, EndDate FROM Reservations WHERE UserID = ?",
+		"SELECT VehicleID, StartTime, EndTime FROM Reservations WHERE UserID = ?",
 		userID,
 	)
 	if err != nil {
+		log.Printf("Error querying reservations: %v", err)
 		http.Error(w, "Failed to retrieve rental history", http.StatusInternalServerError)
 		return
 	}
@@ -77,16 +87,28 @@ func GetRentalHistory(w http.ResponseWriter, r *http.Request) {
 	var history []map[string]interface{}
 	for rows.Next() {
 		var vehicleID string
-		var startDate, endDate string
-		if err := rows.Scan(&vehicleID, &startDate, &endDate); err == nil {
-			history = append(history, map[string]interface{}{
-				"vehicle_id": vehicleID,
-				"start_date": startDate,
-				"end_date": endDate,
-			})
+		var startTime, endTime string
+		if err := rows.Scan(&vehicleID, &startTime, &endTime); err != nil {
+			log.Printf("Error scanning row: %v", err)
+			continue
 		}
+		history = append(history, map[string]interface{}{
+			"vehicle_id": vehicleID,
+			"start_time": startTime,
+			"end_time": endTime,
+		})
 	}
 
+	if len(history) == 0 {
+		log.Printf("No rental history found for user ID: %s", userID)
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message": "No rental history found",
+		})
+		return
+	}
+
+	log.Printf("Retrieved rental history for user ID: %s", userID)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(history)
 }

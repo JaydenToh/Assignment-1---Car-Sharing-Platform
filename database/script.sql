@@ -35,6 +35,8 @@ VALUES
 ('02', 'Alice', 'Wonder', 'alice@gmail.com', 'flyingman'),
 ('03', 'Bob', 'Morse', 'bob@gmail.com', 'ridingacar');
 
+ALTER TABLE Users ADD MembershipTier ENUM('Basic', 'Premium', 'VIP') DEFAULT 'Basic';
+
 INSERT INTO Vehicles (ID, Model, Status)
 VALUES
 ('01', 'Tesla', 'available'),
