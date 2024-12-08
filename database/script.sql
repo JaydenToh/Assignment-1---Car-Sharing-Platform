@@ -29,6 +29,30 @@ CREATE TABLE Billing (
     FOREIGN KEY (ReservationID) REFERENCES Reservations(ID)
 );
 
+ALTER TABLE Billing
+ADD COLUMN MembershipTier ENUM('Basic', 'Premium', 'VIP'),
+ADD COLUMN HourlyRate DECIMAL(10, 2),
+ADD COLUMN DiscountPercentage DECIMAL(5, 2);
+
+UPDATE Billing
+SET MembershipTier = 'Basic', HourlyRate = 10.00, DiscountPercentage = 0
+WHERE ID = 1;
+
+UPDATE Billing
+SET MembershipTier = 'Premium', HourlyRate = 8.00, DiscountPercentage = 10
+WHERE ID = 2;
+
+UPDATE Billing
+SET MembershipTier = 'VIP', HourlyRate = 5.00, DiscountPercentage = 20
+WHERE ID = 3;
+
+INSERT INTO my_db.billing (ReservationID, Amount, MembershipTier, HourlyRate, DiscountPercentage)
+VALUES
+    (01, 30.00, 'Basic', 10.00, 0.00),
+    (02, 40.00, 'Premium', 8.00, 10.00),
+    (03, 55.00, 'VIP', 5.00, 20.00);
+
+
 INSERT INTO Users (ID, FirstName, LastName, Email, Password)
 VALUES
 ('01', 'John', 'Tan', 'john@gmail.com', 'drivingcar'),
@@ -55,3 +79,4 @@ VALUES
 ('01', '01', 30.00),
 ('02', '02', 40.00),
 ('03', '03', 55.00);
+

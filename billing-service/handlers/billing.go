@@ -1,83 +1,191 @@
 package handlers
 
 import (
+	"billing-service/models"
 	"database/sql"
 	"encoding/json"
-	"math/rand"
+	"fmt"
 	"net/http"
-	"strconv"
+	"net/smtp"
 	"time"
-
-	"billing-service/models" // Replace with your actual module path
 )
 
-var dbBilling *sql.DB // Shared database reference for billing handlers
+var dbBilling *sql.DB
 
 // InitBillingHandler initializes the database for the billing handlers
 func InitBillingHandler(database *sql.DB) {
 	dbBilling = database
-	rand.Seed(time.Now().UnixNano()) // Seed for generating random IDs
 }
 
-// GenerateBilling calculates and stores the billing for a reservation
-func GenerateBilling(w http.ResponseWriter, r *http.Request) {
-	var billing models.Billing
-	err := json.NewDecoder(r.Body).Decode(&billing)
+// CalculateBilling calculates the cost of a rental
+func CalculateBilling(w http.ResponseWriter, r *http.Request) {
+    var rental models.Rental
+    err := json.NewDecoder(r.Body).Decode(&rental)
+    if err != nil {
+        http.Error(w, "Invalid request payload", http.StatusBadRequest)
+        return
+    }
+
+    // Parse start and end time
+    startTime, err := time.Parse("2006-01-02 15:04:05", rental.StartTime)
+    if err != nil {
+        http.Error(w, "Invalid start time format", http.StatusBadRequest)
+        return
+    }
+    endTime, err := time.Parse("2006-01-02 15:04:05", rental.EndTime)
+    if err != nil {
+        http.Error(w, "Invalid end time format", http.StatusBadRequest)
+        return
+    }
+
+    // Calculate duration in hours
+    rental.Hours = endTime.Sub(startTime).Hours()
+
+    // Retrieve HourlyRate and DiscountPercentage from Billing table
+    var hourlyRate float64
+    var discountPercentage float64
+    err = dbBilling.QueryRow(
+        "SELECT HourlyRate, DiscountPercentage FROM my_db.billing WHERE MembershipTier = ?",
+        rental.MembershipTier,
+    ).Scan(&hourlyRate, &discountPercentage)
+    if err != nil {
+        http.Error(w, "Failed to retrieve billing info", http.StatusInternalServerError)
+        return
+    }
+
+    // Calculate cost, discount, and total
+    rental.Cost = hourlyRate * rental.Hours
+    rental.Discount = rental.Cost * (discountPercentage / 100)
+    rental.Total = rental.Cost - rental.Discount
+
+    // Respond with billing details
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(rental)
+}
+
+// EstimateBilling calculates the estimated cost based on user input
+func EstimateBilling(w http.ResponseWriter, r *http.Request) {
+	// Parse input JSON
+	var billingRequest struct {
+		MembershipTier string `json:"membership_tier"`
+		StartTime      string `json:"start_time"`
+		EndTime        string `json:"end_time"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&billingRequest)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	// Generate a random ID for the billing
-	billing.ID = "B" + strconv.Itoa(rand.Intn(10000))
+	// Parse Start and End time
+	startTime, err := time.Parse("2006-01-02T15:04:05", billingRequest.StartTime)
+	if err != nil {
+		http.Error(w, "Invalid start time format", http.StatusBadRequest)
+		return
+	}
+	endTime, err := time.Parse("2006-01-02T15:04:05", billingRequest.EndTime)
+	if err != nil {
+		http.Error(w, "Invalid end time format", http.StatusBadRequest)
+		return
+	}
 
-	// Example calculation: Fixed rate * duration (in hours)
-	const hourlyRate = 10.0
-	var durationInHours int
+	// Calculate duration in hours
+	duration := endTime.Sub(startTime).Hours()
+	if duration < 0 {
+		http.Error(w, "End time cannot be earlier than start time", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch the hourly rate and discount percentage for the given membership tier
+	var hourlyRate float64
+	var discountPercentage float64
 	err = dbBilling.QueryRow(
-		"SELECT TIMESTAMPDIFF(HOUR, StartTime, EndTime) FROM Reservations WHERE ID = ?",
-		billing.ReservationID,
-	).Scan(&durationInHours)
+		"SELECT HourlyRate, DiscountPercentage FROM my_db.billing WHERE MembershipTier = ?",
+		billingRequest.MembershipTier,
+	).Scan(&hourlyRate, &discountPercentage)
 	if err != nil {
-		http.Error(w, "Failed to calculate duration for reservation", http.StatusInternalServerError)
-		return
-	}
-	billing.Amount = float64(durationInHours) * hourlyRate
-
-	// Insert billing details into the database
-	_, dbErr := dbBilling.Exec(
-		"INSERT INTO Billing (ID, ReservationID, Amount) VALUES (?, ?, ?)",
-		billing.ID, billing.ReservationID, billing.Amount,
-	)
-	if dbErr != nil {
-		http.Error(w, "Failed to generate billing: "+dbErr.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to fetch billing rates", http.StatusInternalServerError)
 		return
 	}
 
-	// Respond with the billing details
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(billing)
-}
+	// Calculate cost and discount
+	cost := hourlyRate * duration
+	discount := cost * (discountPercentage / 100)
+	total := cost - discount
 
-// GetBilling retrieves billing details for a specific reservation
-func GetBilling(w http.ResponseWriter, r *http.Request) {
-	reservationID := r.URL.Query().Get("reservation_id")
-	if reservationID == "" {
-		http.Error(w, "Reservation ID is required", http.StatusBadRequest)
-		return
-	}
-
-	var billing models.Billing
-	err := dbBilling.QueryRow(
-		"SELECT ID, ReservationID, Amount FROM Billing WHERE ReservationID = ?",
-		reservationID,
-	).Scan(&billing.ID, &billing.ReservationID, &billing.Amount)
-	if err != nil {
-		http.Error(w, "Billing details not found", http.StatusNotFound)
-		return
-	}
-
-	// Respond with the billing details
+	// Return the estimated billing
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(billing)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"membership_tier": billingRequest.MembershipTier,
+		"start_time":      billingRequest.StartTime,
+		"end_time":        billingRequest.EndTime,
+		"hours":           duration,
+		"cost":            cost,
+		"discount":        discount,
+		"total":           total,
+	})
 }
+
+func sendEmail(toEmail, subject, body string) error {
+	// Email configuration
+	from := "your_email@example.com"       // Replace with your email
+	password := "your_email_password"      // Replace with your email password
+	smtpHost := "smtp.example.com"         // Replace with your SMTP server, e.g., smtp.gmail.com
+	smtpPort := "587"                      // Replace with your SMTP port
+
+	// Email message
+	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
+
+	// Set up authentication
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+
+	// Send the email
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, []byte(message))
+	if err != nil {
+		return fmt.Errorf("failed to send email: %v", err)
+	}
+
+	return nil
+}
+
+/// GenerateInvoice generates an invoice and sends it via email
+func GenerateInvoice(w http.ResponseWriter, r *http.Request) {
+	// Parse the input request
+	var invoiceRequest struct {
+		UserEmail   string `json:"user_email"`
+		UserID      string `json:"user_id"`
+		Reservation string `json:"reservation_id"`
+		Amount      string `json:"amount"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&invoiceRequest)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	// Create the invoice details
+	invoiceDetails := fmt.Sprintf(
+		`Invoice:
+---------------------
+Reservation ID: %s
+User ID: %s
+Total Amount: $%s
+---------------------
+Thank you for using our service!`,
+		invoiceRequest.Reservation, invoiceRequest.UserID, invoiceRequest.Amount,
+	)
+
+	// Send the invoice via email
+	err = sendEmail(invoiceRequest.UserEmail, "Your Invoice", invoiceDetails)
+	if err != nil {
+		http.Error(w, "Failed to send invoice: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with a success message
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Invoice sent successfully!",
+	})
+}
+

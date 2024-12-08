@@ -4,27 +4,27 @@ import (
 	"log"
 	"net/http"
 
-	"billing-service/handlers" // Replace with your actual module path
+	"billing-service/database"
+	"billing-service/handlers"
 
-	"github.com/gorilla/mux" // Ensure this is installed: go get github.com/gorilla/mux
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Initialize the database connection
-	initDB()
-	defer closeDB()
+	// Initialize database connection
+	database.InitDB()
+	defer database.CloseDB()
 
-	// Initialize the billing handlers with the database connection
-	handlers.InitBillingHandler(db)
+	// Initialize handlers
+	handlers.InitBillingHandler(database.DB)
 
-	// Set up the router
+	// Set up routes
 	router := mux.NewRouter()
+	router.HandleFunc("/calculate-billing", handlers.CalculateBilling).Methods("POST")
+	router.HandleFunc("/estimate-billing", handlers.EstimateBilling).Methods("POST")
+	router.HandleFunc("/generate-invoice", handlers.GenerateInvoice).Methods("POST")
 
-	// Define routes for Billing Service
-	router.HandleFunc("/billing/generate", handlers.GenerateBilling).Methods("POST")
-	router.HandleFunc("/billing", handlers.GetBilling).Methods("GET")
-
-	// Start the server
-	log.Println("Billing Service running on port 8002")
-	log.Fatal(http.ListenAndServe(":8002", router))
+	// Start the HTTP server
+	log.Println("Billing Service running on port 8001")
+	log.Fatal(http.ListenAndServe(":8001", router))
 }
