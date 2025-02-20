@@ -1,0 +1,28 @@
+/* Make the User ID input bigger and add spacing */
+.billing-management .billing-form {
+  /* space below the input row before the buttons */
+  margin-bottom: 2rem;
+
+  /* Put label & input side by side; remove or tweak if you want them stacked */
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* space between label and input */
+}
+
+.billing-management .billing-form label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.billing-management .billing-form input {
+  width: 300px; /* bigger width */
+  padding: 0.5rem; /* padding inside the box */
+  font-size: 1.1rem; /* larger text */
+}
+
+/* More spacing between the three buttons */
+.billing-management .billing-buttons {
+  margin-bottom: 2rem; /* space below the buttons if you have more content after */
+  display: flex;
+  gap: 2rem; /* bigger gap between each button */
+}

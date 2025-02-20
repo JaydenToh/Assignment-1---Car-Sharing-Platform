@@ -5,13 +5,11 @@ import {
   modifyBooking,
   cancelBooking,
 } from "../utils/api";
-import "./styles.css";
 
 function VehicleManagement() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch vehicles on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -24,7 +22,6 @@ function VehicleManagement() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -92,7 +89,7 @@ function VehicleManagement() {
   };
 
   if (loading) {
-    return <div>Loading vehicles...</div>;
+    return <div className="container">Loading vehicles...</div>;
   }
 
   return (
