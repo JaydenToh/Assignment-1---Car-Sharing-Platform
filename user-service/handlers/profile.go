@@ -22,7 +22,7 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		LastName  string `json:"last_name"`
 		Email     string `json:"email"`
 		Password  string `json:"password"`
-	}
+	}	
 
 	err := json.NewDecoder(r.Body).Decode(&userUpdate)
 	if err != nil {

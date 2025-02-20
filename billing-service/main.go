@@ -25,14 +25,14 @@ func main() {
 	router.HandleFunc("/estimate-billing", handlers.EstimateBilling).Methods("POST")
 	router.HandleFunc("/generate-invoice", handlers.GenerateInvoice).Methods("POST")
 
-	// Set up CORS middleware
+	// CORS Configuration
 	corsHandler := gorillahandlers.CORS(
-		gorillahandlers.AllowedOrigins([]string{"http://localhost:5173"}), // Adjust based on your frontend
+		gorillahandlers.AllowedOrigins([]string{"http://localhost:5173"}),
 		gorillahandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
 		gorillahandlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)
 
-	// Start the HTTP server with CORS middleware applied
+	// Start the HTTP server with CORS
 	log.Println("Billing Service running on port 8001")
 	log.Fatal(http.ListenAndServe(":8001", corsHandler(router)))
 }

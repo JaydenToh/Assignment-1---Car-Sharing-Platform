@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "./VehicleManagement.css";
 import {
   fetchVehicles,
   bookVehicle,
@@ -10,91 +11,85 @@ function VehicleManagement() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // For modifying a reservation
+  const [reservationId, setReservationId] = useState("");
+  const [modStartTime, setModStartTime] = useState("");
+  const [modEndTime, setModEndTime] = useState("");
+
   useEffect(() => {
-    const fetchData = async () => {
+    const getData = async () => {
       try {
         const vehicleData = await fetchVehicles();
         setVehicles(vehicleData);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
-        alert("Failed to fetch vehicles. Please try again later.");
+        alert("Failed to fetch vehicles");
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    getData();
   }, []);
 
   // Book a vehicle
-  const handleBookVehicle = async () => {
-    const vehicleId = prompt("Enter vehicle ID to book:");
-    const userId = prompt("Enter your User ID:");
+  const handleBookVehicle = async (vehicleId) => {
+    // Hard-coded user ID for example
+    const userId = "01";
     const startTime = prompt("Enter start time (YYYY-MM-DD HH:MM:SS):");
     const endTime = prompt("Enter end time (YYYY-MM-DD HH:MM:SS):");
 
-    if (!vehicleId || !userId || !startTime || !endTime) {
-      alert("All fields are required to book a vehicle.");
+    if (!startTime || !endTime) {
+      alert("All fields required");
       return;
     }
 
     try {
-      const response = await bookVehicle(vehicleId, userId, startTime, endTime);
-      alert(`Vehicle booked successfully: ${response.message}`);
+      await bookVehicle(vehicleId, userId, startTime, endTime);
+      alert("Vehicle booked successfully!");
+      // Optionally refresh the vehicle list
     } catch (error) {
-      console.error("Error booking vehicle:", error);
       alert(`Error booking vehicle: ${error.message}`);
     }
   };
 
-  // Modify a booking
-  const handleModifyBooking = async () => {
-    const reservationId = prompt("Enter reservation ID to modify:");
-    const newStartTime = prompt("Enter new start time (YYYY-MM-DD HH:MM:SS):");
-    const newEndTime = prompt("Enter new end time (YYYY-MM-DD HH:MM:SS):");
-
-    if (!reservationId || !newStartTime || !newEndTime) {
-      alert("All fields are required to modify a booking.");
+  // Modify a reservation
+  const handleModifyReservation = async () => {
+    if (!reservationId || !modStartTime || !modEndTime) {
+      alert("All fields required for modifying a reservation");
       return;
     }
 
     try {
-      const response = await modifyBooking(
-        reservationId,
-        newStartTime,
-        newEndTime
-      );
-      alert(`Booking modified successfully: ${response.message}`);
+      await modifyBooking(reservationId, modStartTime, modEndTime);
+      alert("Reservation modified successfully!");
     } catch (error) {
-      console.error("Error modifying booking:", error);
-      alert(`Error modifying booking: ${error.message}`);
+      alert(`Error modifying reservation: ${error.message}`);
     }
   };
 
-  // Cancel a booking
+  // Cancel a reservation
   const handleCancelBooking = async () => {
-    const reservationId = prompt("Enter reservation ID to cancel:");
-
-    if (!reservationId) {
-      alert("Reservation ID is required to cancel a booking.");
+    const resId = prompt("Enter reservation ID to cancel:");
+    if (!resId) {
       return;
     }
 
     try {
-      const response = await cancelBooking(reservationId);
-      alert(`Booking canceled successfully: ${response.message}`);
+      await cancelBooking(resId);
+      alert("Reservation canceled successfully!");
     } catch (error) {
-      console.error("Error canceling booking:", error);
-      alert(`Error canceling booking: ${error.message}`);
+      alert(`Error canceling reservation: ${error.message}`);
     }
   };
 
   if (loading) {
-    return <div className="container">Loading vehicles...</div>;
+    return <div>Loading vehicles...</div>;
   }
 
   return (
-    <div className="container">
+    <div className="vehicle-management">
       <h1>Vehicle Management</h1>
+
       <section>
         <h2>Available Vehicles</h2>
         <table>
@@ -103,6 +98,7 @@ function VehicleManagement() {
               <th>ID</th>
               <th>Model</th>
               <th>Status</th>
+              <th>Book</th>
             </tr>
           </thead>
           <tbody>
@@ -111,15 +107,54 @@ function VehicleManagement() {
                 <td>{vehicle.id}</td>
                 <td>{vehicle.model}</td>
                 <td>{vehicle.status}</td>
+                <td>
+                  {vehicle.status === "available" ? (
+                    <button onClick={() => handleBookVehicle(vehicle.id)}>
+                      Book
+                    </button>
+                  ) : (
+                    "Not Available"
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="buttons">
-          <button onClick={handleBookVehicle}>Book Vehicle</button>
-          <button onClick={handleModifyBooking}>Modify Booking</button>
-          <button onClick={handleCancelBooking}>Cancel Booking</button>
+      </section>
+
+      <hr />
+
+      <section>
+        <h2>Modify a Reservation</h2>
+        <div>
+          <label>Reservation ID:</label>
+          <input
+            value={reservationId}
+            onChange={(e) => setReservationId(e.target.value)}
+          />
         </div>
+        <div>
+          <label>New Start Time (YYYY-MM-DD HH:MM:SS):</label>
+          <input
+            value={modStartTime}
+            onChange={(e) => setModStartTime(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>New End Time (YYYY-MM-DD HH:MM:SS):</label>
+          <input
+            value={modEndTime}
+            onChange={(e) => setModEndTime(e.target.value)}
+          />
+        </div>
+        <button onClick={handleModifyReservation}>Modify</button>
+      </section>
+
+      <hr />
+
+      <section>
+        <h2>Cancel a Reservation</h2>
+        <button onClick={handleCancelBooking}>Cancel Reservation</button>
       </section>
     </div>
   );

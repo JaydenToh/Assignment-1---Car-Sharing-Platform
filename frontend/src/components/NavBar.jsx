@@ -16,6 +16,9 @@ function NavBar() {
           <Link to="/billing">Billing Management</Link>
         </li>
         <li>
+          <Link to="/login">Get Started Today</Link>
+        </li>
+        <li>
           <Link to="/user">Profile</Link>
         </li>
       </ul>
