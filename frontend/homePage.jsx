@@ -4,7 +4,7 @@ import {
   bookVehicle,
   modifyBooking,
   cancelBooking,
-} from "./utils/api";
+} from "../utils/api";
 import "./styles.css";
 
 function VehicleManagement() {
