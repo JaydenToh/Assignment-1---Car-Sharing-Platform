@@ -8,18 +8,34 @@ import {
 
 function BillingManagement() {
   const [userId, setUserId] = useState("");
+  const [membershipTier, setMembershipTier] = useState("Basic");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [billingResult, setBillingResult] = useState(null);
   const [estimatedCost, setEstimatedCost] = useState(null);
   const [invoiceData, setInvoiceData] = useState(null);
 
+  const formatDateTime = (datetime) => {
+    if (!datetime) return "";
+    return datetime.replace("T", " ") + ":00";
+  };
+
   // Calculate billing
   const handleCalculateBilling = async () => {
-    if (!userId) {
-      alert("Please enter a User ID.");
+    if (!userId || !membershipTier || !startTime || !endTime) {
+      alert("Please fill in all required fields.");
       return;
     }
     try {
-      const response = await calculateBilling(userId);
+      const formattedStartTime = formatDateTime(startTime);
+      const formattedEndTime = formatDateTime(endTime);
+
+      const response = await calculateBilling({
+        membership_tier: membershipTier,
+        start_time: formattedStartTime,
+        end_time: formattedEndTime,
+      });
       setBillingResult(response);
     } catch (error) {
       console.error("Error calculating billing:", error);
@@ -29,12 +45,19 @@ function BillingManagement() {
 
   // Estimate billing
   const handleEstimateBilling = async () => {
-    if (!userId) {
-      alert("Please enter a User ID.");
+    if (!userId || !membershipTier || !startTime || !endTime) {
+      alert("Please fill in all required fields.");
       return;
     }
     try {
-      const response = await estimateBilling(userId);
+      const formattedStartTime = formatDateTime(startTime);
+      const formattedEndTime = formatDateTime(endTime);
+
+      const response = await estimateBilling({
+        membership_tier: membershipTier,
+        start_time: formattedStartTime,
+        end_time: formattedEndTime,
+      });
       setEstimatedCost(response);
     } catch (error) {
       console.error("Error estimating billing:", error);
@@ -44,12 +67,17 @@ function BillingManagement() {
 
   // Generate invoice
   const handleGenerateInvoice = async () => {
-    if (!userId) {
-      alert("Please enter a User ID.");
+    if (!userId || !userEmail || !billingResult?.total) {
+      alert("Please fill in all required fields.");
       return;
     }
     try {
-      const response = await generateInvoice(userId);
+      const response = await generateInvoice({
+        user_email: userEmail,
+        user_id: userId,
+        reservation_id: 5, // Static value, adjust accordingly
+        total_amount: billingResult.total,
+      });
       setInvoiceData(response);
     } catch (error) {
       console.error("Error generating invoice:", error);
@@ -68,6 +96,38 @@ function BillingManagement() {
           onChange={(e) => setUserId(e.target.value)}
           placeholder="Enter user ID"
         />
+
+        <label>Membership Tier:</label>
+        <select
+          value={membershipTier}
+          onChange={(e) => setMembershipTier(e.target.value)}
+        >
+          <option value="Basic">Basic</option>
+          <option value="Premium">Premium</option>
+          <option value="VIP">VIP</option>
+        </select>
+
+        <label>Start Time (YYYY-MM-DD HH:MM:SS):</label>
+        <input
+          type="datetime-local"
+          value={startTime}
+          onChange={(e) => setStartTime(e.target.value)}
+        />
+
+        <label>End Time (YYYY-MM-DD HH:MM:SS):</label>
+        <input
+          type="datetime-local"
+          value={endTime}
+          onChange={(e) => setEndTime(e.target.value)}
+        />
+
+        <label>User Email (For Invoice):</label>
+        <input
+          type="email"
+          value={userEmail}
+          onChange={(e) => setUserEmail(e.target.value)}
+          placeholder="Enter user email"
+        />
       </div>
 
       <div className="billing-buttons">
@@ -77,21 +137,27 @@ function BillingManagement() {
       </div>
 
       {billingResult && (
-        <div>
+        <div className="billing-result">
           <h2>Billing Result</h2>
-          <pre>{JSON.stringify(billingResult, null, 2)}</pre>
+          <p>Cost: ${billingResult.cost}</p>
+          <p>Discount: ${billingResult.discount}</p>
+          <p>Total: ${billingResult.total}</p>
         </div>
       )}
+
       {estimatedCost && (
-        <div>
+        <div className="billing-result">
           <h2>Estimated Cost</h2>
-          <pre>{JSON.stringify(estimatedCost, null, 2)}</pre>
+          <p>Cost: ${estimatedCost.cost}</p>
+          <p>Discount: ${estimatedCost.discount}</p>
+          <p>Total: ${estimatedCost.total}</p>
         </div>
       )}
+
       {invoiceData && (
-        <div>
-          <h2>Invoice Data</h2>
-          <pre>{JSON.stringify(invoiceData, null, 2)}</pre>
+        <div className="billing-result">
+          <h2>Invoice</h2>
+          <p>{invoiceData.message}</p>
         </div>
       )}
     </div>

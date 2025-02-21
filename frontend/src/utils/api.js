@@ -154,14 +154,11 @@ export async function getRentalHistory(id) {
   return response.json();
 }
 
-// --------------------
-// Billing Service (unchanged)
-// --------------------
-export async function calculateBilling(userId) {
+export async function calculateBilling(data) {
   const response = await fetch("http://localhost:8001/calculate-billing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify(data),
   });
   if (!response.ok) {
     const errorData = await response.json();
@@ -170,11 +167,11 @@ export async function calculateBilling(userId) {
   return response.json();
 }
 
-export async function estimateBilling(userId) {
+export async function estimateBilling(data) {
   const response = await fetch("http://localhost:8001/estimate-billing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify(data),
   });
   if (!response.ok) {
     const errorData = await response.json();
@@ -183,11 +180,11 @@ export async function estimateBilling(userId) {
   return response.json();
 }
 
-export async function generateInvoice(userId) {
+export async function generateInvoice(data) {
   const response = await fetch("http://localhost:8001/generate-invoice", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify(data),
   });
   if (!response.ok) {
     const errorData = await response.json();

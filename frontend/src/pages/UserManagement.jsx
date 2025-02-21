@@ -109,6 +109,7 @@ function UserManagement() {
             <input
               value={queryUserId}
               onChange={(e) => setQueryUserId(e.target.value)}
+              className="input-box"
             />
             <button onClick={handleGetMembershipStatus}>
               Check Membership
