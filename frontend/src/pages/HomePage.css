@@ -1,0 +1,48 @@
+/* Increase space below the paragraph */
+.home-page p {
+  margin-bottom: 3rem; /* Adjust as needed for more or less space */
+}
+
+/* Container for the three boxes */
+.home-page .feature-boxes {
+  display: flex;
+  justify-content: space-evenly; /* Distribute boxes evenly */
+  align-items: center;
+  gap: 2rem; /* Horizontal space between boxes */
+  margin-top: 0; /* If you previously had margin-top, you can reset or adjust it */
+}
+
+/* Shared box styling (make them bigger) */
+.feature-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 350px; /* Increase width to make boxes bigger */
+  min-height: 250px; /* Increase height */
+  padding: 2rem; /* More padding inside each box */
+  text-align: center;
+  text-decoration: none;
+  color: #000;
+  border-radius: 8px;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+/* Hover effect for all feature boxes */
+.feature-box:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Individual colors for each box */
+.user-box {
+  background-color: #ffd6d6; /* Light red/pink */
+}
+
+.billing-box {
+  background-color: #d6ffd6; /* Light green */
+}
+
+.vehicle-box {
+  background-color: #d6d6ff; /* Light blue/purple */
+}

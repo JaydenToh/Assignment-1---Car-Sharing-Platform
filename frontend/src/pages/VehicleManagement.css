@@ -1,0 +1,105 @@
+.vehicle-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.vehicle-management h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.vehicle-management section {
+  background-color: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.vehicle-management h2 {
+  color: #555;
+  border-bottom: 2px solid #eeeeee;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+/* Table Styling */
+.vehicle-management table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.vehicle-management th,
+.vehicle-management td {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #dddddd;
+}
+
+.vehicle-management th {
+  background-color: #f4f4f9;
+  color: #555;
+}
+
+.vehicle-management tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.vehicle-management tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Button Styling */
+.vehicle-management button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vehicle-management button:hover {
+  background-color: #45a049;
+}
+
+.vehicle-management button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Input Fields */
+.vehicle-management input {
+  width: calc(100% - 20px);
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+.vehicle-management input:focus {
+  border-color: #4caf50;
+  outline: none;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+
+/* Media Query for Responsive Design */
+@media (max-width: 768px) {
+  .vehicle-management table,
+  .vehicle-management input,
+  .vehicle-management button {
+    width: 100%;
+  }
+
+  .vehicle-management section {
+    margin-bottom: 15px;
+    padding: 15px;
+  }
+}

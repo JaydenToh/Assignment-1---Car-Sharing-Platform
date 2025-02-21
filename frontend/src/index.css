@@ -1,0 +1,127 @@
+/* Reset / Basic Setup */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fff; /* White background */
+  color: #000; /* Black text */
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background-color: #f1f1f1; /* Light gray for navbar background */
+  position: sticky; /* or fixed if you prefer it always on top */
+  top: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem; /* Increase padding to make navbar bigger */
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.navbar li a {
+  color: #000; /* Black text for navbar links */
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem; /* Increase font size */
+}
+
+.navbar li a:hover {
+  text-decoration: underline;
+}
+
+/* PAGE CONTAINER */
+.container {
+  max-width: 800px; /* limit width to keep content centered */
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* HEADINGS & SECTIONS */
+h1,
+h2,
+h3 {
+  margin-bottom: 1rem;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+/* TABLES */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+table,
+th,
+td {
+  border: 1px solid #ccc;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background-color: #eaeaea;
+}
+
+/* BUTTONS */
+button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background-color: #ddd;
+  color: #000;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 1rem; /* small spacing between buttons */
+  font-size: 1rem;
+}
+
+button:hover {
+  background-color: #ccc;
+}
+
+/* FORMS */
+form {
+  margin-top: 1rem;
+}
+
+form div {
+  margin-bottom: 1rem;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+form input {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  color: #000;
+  border-radius: 4px;
+}
+
+/* OPTIONAL UTILITY */
+.buttons {
+  margin-top: 1rem;
+}

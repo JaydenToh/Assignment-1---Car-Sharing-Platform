@@ -1,0 +1,73 @@
+.billing-management {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.billing-management h1 {
+  text-align: center;
+  color: #333;
+}
+
+.billing-form {
+  margin-bottom: 20px;
+}
+
+.billing-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.billing-form input,
+.billing-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.billing-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.billing-buttons button {
+  flex: 1;
+  padding: 10px;
+  margin: 5px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.billing-buttons button:hover {
+  background-color: #218838;
+}
+
+.billing-result {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 4px;
+}
+
+.billing-result h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.billing-result p {
+  margin: 5px 0;
+  color: #555;
+  font-size: 16px;
+}

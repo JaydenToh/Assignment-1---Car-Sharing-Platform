@@ -1,0 +1,35 @@
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  background-color: #f1f1f1;
+  position: sticky; /* or fixed if you want it always on top */
+  top: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  padding: 2rem; /* Increase vertical padding for a taller navbar */
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  gap: 3rem; /* Increase gap for wider spacing between links */
+  margin: 0; /* Ensure no extra margins */
+  padding: 0;
+}
+
+.navbar li a {
+  color: #000;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem; /* Padding around each link for a bigger clickable area */
+  transition: background-color 0.3s, color 0.3s; /* Smooth hover transition */
+}
+
+.navbar li a:hover {
+  background-color: #ccc; /* hover background color */
+  color: #333; /* hover text color */
+  border-radius: 4px;
+  text-decoration: none; /* remove underline on hover */
+}

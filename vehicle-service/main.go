@@ -7,32 +7,37 @@ import (
 	"vehicle-service/database"
 	"vehicle-service/handlers"
 
-	gorillahandlers "github.com/gorilla/handlers" // Import CORS handlers package
+	gorillahandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Initialize database connection
+	// 1. Initialize DB
 	database.InitDB()
 	defer database.CloseDB()
 
-	// Initialize handlers with database
+	// 2. Init handlers
 	handlers.InitReservationHandler(database.DB)
 
-	// Create a router and define routes
+	// 3. Setup router
 	router := mux.NewRouter()
-	router.HandleFunc("/get-vehicles", handlers.FetchAvailableVehicles).Methods("GET")
-	router.HandleFunc("/check-availability", handlers.CheckAvailability).Methods("POST")
+
+	// 4. Register routes
+	router.HandleFunc("/get-vehicles", handlers.FetchVehicles).Methods("GET")
 	router.HandleFunc("/book-vehicle", handlers.BookVehicle).Methods("POST")
-	router.HandleFunc("/modify-booking", handlers.ModifyBooking).Methods("PUT")
+	router.HandleFunc("/modify-booking", handlers.ModifyReservation).Methods("PUT")
 	router.HandleFunc("/cancel-booking", handlers.CancelBooking).Methods("DELETE")
 
-	// Define CORS options
-	corsOptions := gorillahandlers.AllowedOrigins([]string{"http://localhost:5173"}) // Replace with your frontend URL
+	// 5. Optional: Set up CORS
+	corsOptions := gorillahandlers.AllowedOrigins([]string{"http://localhost:5173"})
 	corsMethods := gorillahandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	corsHeaders := gorillahandlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 
-	// Start the HTTP server with CORS
-	log.Println("Vehicle Service is running on port 8002")
-	log.Fatal(http.ListenAndServe(":8002", gorillahandlers.CORS(corsOptions, corsMethods, corsHeaders)(router)))
+	// 6. Start server
+	log.Println("Vehicle Service running on port 8002")
+	log.Fatal(http.ListenAndServe(":8002", gorillahandlers.CORS(
+		corsOptions,
+		corsMethods,
+		corsHeaders,
+	)(router)))
 }

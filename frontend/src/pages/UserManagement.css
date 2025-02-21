@@ -1,0 +1,185 @@
+/* General Layout */
+.user-management {
+  display: flex;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #f4f4f9;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+  font-size: 1.5em;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 10px;
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.3s ease;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.sidebar ul li:hover {
+  background-color: #e6e6fa;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+/* Update Profile Section */
+.profile-form {
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: #fafafa;
+  padding: 30px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.profile-form .form-group {
+  margin-bottom: 20px;
+}
+
+.profile-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.profile-form input[type="text"],
+.profile-form input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.profile-form input[type="text"]:focus,
+.profile-form input[type="password"]:focus {
+  border-color: #66afe9;
+  outline: none;
+}
+
+.profile-form button {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.2em;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.profile-form button:hover {
+  background-color: #218838;
+}
+
+/* Membership and Rental History Section */
+.membership-section {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.membership-section label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+  font-size: 20px;
+}
+
+/* User ID Input Box Styles */
+.membership-section input[type="text"] {
+  width: 80%;
+  max-width: 350px;
+  padding: 12px;
+  font-size: 1.1em;
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: block;
+  margin: 10px auto 20px auto;
+  transition: border-color 0.3s;
+}
+
+/* In your CSS file, e.g., styles.css */
+.input-box {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.membership-section input[type="text"]:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.membership-section button {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px;
+  font-size: 1.2em;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 15px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  background-color: #28a745;
+}
+
+.membership-section input[type="text"]:focus {
+  border-color: #66afe9;
+  outline: none;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+}
+
+/* Button Colors */
+.membership-section .check-membership {
+  background-color: #007bff;
+}
+
+.membership-section .check-membership:hover {
+  background-color: #0056b3;
+}
+
+.membership-section .view-rental {
+  background-color: #17a2b8;
+}
+
+.membership-section .view-rental:hover {
+  background-color: #117a8b;
+}
