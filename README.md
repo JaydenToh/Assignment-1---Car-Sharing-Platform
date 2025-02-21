@@ -108,9 +108,22 @@ These services communicate via RESTful APIs, making the system **scalable**, **m
 
 # Setup and Instructions
 
+Below is a **complete README.md** file in **one Markdown snippet** that covers:
+
+1. **Database Setup** (with a single fenced code block for the entire SQL script)
+2. **Running the Microservices** (Frontend, User Service, Vehicle Service, Billing Service)
+3. **Postman Testing** for **all features**: user-service, vehicle-service, and billing-service
+
+Simply copy this **entire** snippet into your `README.md`. Each code block will have its own **“copy”** button when viewed on GitHub or a Markdown previewer that supports it.
+
+---
+
+````md
+# Setup and Instructions
+
 ## Database Setup
 
-### Database Script
+### 1. Database Script
 
 A file named **`script.sql`** is provided. This script creates the necessary tables and initial data.
 
@@ -172,6 +185,21 @@ CREATE TABLE my_db.reservations (
     FOREIGN KEY (VehicleID) REFERENCES my_db.vehicles(ID) ON DELETE CASCADE
 );
 
+-- Create Billing Table
+CREATE TABLE my_db.billing (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    MembershipTier ENUM('Basic', 'Premium', 'VIP') NOT NULL,
+    HourlyRate DECIMAL(10, 2) NOT NULL,
+    DiscountPercentage DECIMAL(5, 2) NOT NULL
+);
+
+-- Data for Billing
+INSERT INTO my_db.billing (MembershipTier, HourlyRate, DiscountPercentage)
+VALUES
+    ('Basic', 10.00, 0.00),
+    ('Premium', 15.00, 10.00),
+    ('VIP', 20.00, 20.00);
+
 -- Create Promotions Table
 CREATE TABLE my_db.promotions (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -183,36 +211,284 @@ CREATE TABLE my_db.promotions (
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (200, 30.00);
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (100, 20.00);
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (50, 10.00);
+```
+````
 
+---
+
+# Project Setup and Usage
+
+## 2. Executing the Script
+
+1. **Launch MySQL** via MySQL Workbench (or your preferred method).
+2. **Create the database**:
+   ```sql
+   CREATE DATABASE my_db;
+   USE my_db;
+   ```
+3. **Run** the script above. It will create:
+   - `users`
+   - `vehicles`
+   - `reservations`
+   - `billing`
+   - `promotions`
+
+---
+
+## Running the Microservices
+
+### Frontend
+
+1. **Open a new terminal**:
+   ```bash
+   cd frontend
+   ```
+2. **Install dependencies** and **run** the development server:
+   ```bash
+   npm install
+   npm run dev
+   ```
+3. The frontend is now accessible at [http://localhost:5173](http://localhost:5173).
+
+---
+
+### User Service
+
+1. **Open another terminal**:
+   ```bash
+   cd user-service
+   go run main.go
+   ```
+   - Typically runs on **port `8002`** (adjust if needed).
+
+---
+
+### Vehicle Service
+
+1. **Open another terminal**:
+   ```bash
+   cd vehicle-service
+   go run main.go
+   ```
+   - Typically runs on **port `8003`** (adjust if needed).
+
+---
+
+### Billing Service
+
+1. **Open another terminal**:
+   ```bash
+   cd billing-service
+   go run main.go
+   ```
+   - Typically runs on **port `8001`** (adjust if needed).
+
+> **Note**: Adjust ports according to your `.env` or code settings.
+
+---
+
+# Postman Testing
+
+Once all services are running, use **Postman** (or similar tool) to test each endpoint.
+
+## 1. **User Service** (Example)
+
+Base URL: `http://localhost:8002`
+
+---
+
+### 1.1. Register User
+
+- **Method:** `POST`
+- **Endpoint:** `/register`
+- **Description:** Create a new user.
+
+**Headers:**
+
+```http
+Content-Type: application/json
 ```
 
-## Postman Testing
+**Body (JSON):**
 
-### 🚀 Billing Service
+```json
+{
+  "id": "07",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "jane@example.com",
+  "password": "secret123",
+  "membershipTier": "Basic"
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "message": "User registered successfully!"
+}
+```
+
+---
+
+### 1.2. Update Profile
+
+- **Method:** `PUT`
+- **Endpoint:** `/update-profile`
+- **Description:** Update an existing user’s details.
+
+**Headers:**
+
+```http
+Content-Type: application/json
+```
+
+**Body (JSON):**
+
+```json
+{
+  "id": "07",
+  "first_name": "Janet",
+  "last_name": "Smith",
+  "email": "janet@example.com",
+  "password": "newpass123"
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "message": "Profile updated successfully!"
+}
+```
+
+> Adjust the keys if your backend expects `firstName` instead of `first_name`.
+
+---
+
+### 1.3. User Login (Optional Example)
+
+- **Method:** `POST`
+- **Endpoint:** `/login`
+- **Description:** Authenticate user.
+
+**Headers:**
+
+```http
+Content-Type: application/json
+```
+
+**Body (JSON):**
+
+```json
+{
+  "email": "janet@example.com",
+  "password": "newpass123"
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "message": "Login successful!",
+  "token": "JWT or session token here"
+}
+```
+
+---
+
+## 2. **Vehicle Service** (Example)
+
+Base URL: `http://localhost:8003`
+
+---
+
+### 2.1. Get All Vehicles
+
+- **Method:** `GET`
+- **Endpoint:** `/vehicles`
+- **Description:** Retrieves a list of all vehicles.
+
+**Expected Response** (`200 OK`):
+
+```json
+[
+  {
+    "ID": "01",
+    "Model": "Tesla",
+    "Status": "available"
+  },
+  ...
+]
+```
+
+---
+
+### 2.2. Update Vehicle Status
+
+- **Method:** `POST`
+- **Endpoint:** `/update-status`
+- **Description:** Change a vehicle’s status (e.g., to `booked`).
+
+**Headers:**
+
+```http
+Content-Type: application/json
+```
+
+**Body (JSON):**
+
+```json
+{
+  "vehicle_id": "03",
+  "status": "booked"
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "message": "Vehicle status updated successfully!"
+}
+```
+
+---
+
+## 3. **Billing Service**
 
 Base URL: `http://localhost:8001`
 
 ---
 
-### 1. Calculate Billing
+### 3.1. Calculate Billing
 
 - **Method:** `POST`
 - **Endpoint:** `/calculate-billing`
-- **Description:** Calculate the billing amount based on membership tier and rental duration.
+- **Description:** Calculate the cost of a rental (saved in DB).
 
-**Request Headers:**
+**Headers:**
 
 ```http
 Content-Type: application/json
+```
 
-Request Body:
+**Body (JSON):**
+
+```json
 {
   "membership_tier": "Premium",
   "start_time": "2025-03-01 10:00:00",
   "end_time": "2025-03-01 12:00:00"
 }
+```
 
-Expected Response (200 OK):
+**Expected Response** (`200 OK`):
+
+```json
 {
   "membership_tier": "Premium",
   "start_time": "2025-03-01 10:00:00",
@@ -222,4 +498,83 @@ Expected Response (200 OK):
   "discount": 3.0,
   "total": 27.0
 }
+```
+
+---
+
+### 3.2. Estimate Billing
+
+- **Method:** `POST`
+- **Endpoint:** `/estimate-billing`
+- **Description:** Estimate cost without finalizing or saving.
+
+**Headers:**
+
+```http
+Content-Type: application/json
+```
+
+**Body (JSON):**
+
+```json
+{
+  "membership_tier": "Basic",
+  "start_time": "2025-05-10 14:00:00",
+  "end_time": "2025-05-10 16:00:00"
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "membership_tier": "Basic",
+  "start_time": "2025-05-10 14:00:00",
+  "end_time": "2025-05-10 16:00:00",
+  "hours": 2,
+  "cost": 20.0,
+  "discount": 0.0,
+  "total": 20.0
+}
+```
+
+---
+
+### 3.3. Generate Invoice
+
+- **Method:** `POST`
+- **Endpoint:** `/generate-invoice`
+- **Description:** Send an invoice email to the user.
+
+**Headers:**
+
+```http
+Content-Type: application/json
+```
+
+**Body (JSON):**
+
+```json
+{
+  "user_email": "john@gmail.com",
+  "user_id": "01",
+  "reservation_id": 1,
+  "total_amount": 27.0
+}
+```
+
+**Expected Response** (`200 OK`):
+
+```json
+{
+  "message": "Invoice sent successfully!"
+}
+```
+
+---
+
+---
+
+```
+
 ```
