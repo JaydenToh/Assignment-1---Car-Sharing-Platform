@@ -86,19 +86,51 @@ function UserManagement() {
             )}
             className="profile-form"
           >
-            {["id", "firstName", "lastName", "email", "password"].map(
-              (field) => (
-                <div key={field} className="form-group">
-                  <label>{field}:</label>
-                  <input
-                    name={field}
-                    type={field === "password" ? "password" : "text"}
-                    value={profileForm[field]}
-                    onChange={handleChange(setProfileForm)}
-                  />
-                </div>
-              )
-            )}
+            <div className="form-group">
+              <label>ID:</label>
+              <input
+                name="id"
+                type="text"
+                value={profileForm.id}
+                onChange={handleChange(setProfileForm)}
+              />
+            </div>
+            <div className="form-group">
+              <label>First Name:</label>
+              <input
+                name="firstName"
+                type="text"
+                value={profileForm.firstName}
+                onChange={handleChange(setProfileForm)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Last Name:</label>
+              <input
+                name="lastName"
+                type="text"
+                value={profileForm.lastName}
+                onChange={handleChange(setProfileForm)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Email Address:</label>
+              <input
+                name="email"
+                type="email"
+                value={profileForm.email}
+                onChange={handleChange(setProfileForm)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Password:</label>
+              <input
+                name="password"
+                type="password"
+                value={profileForm.password}
+                onChange={handleChange(setProfileForm)}
+              />
+            </div>
             <button type="submit">Update Profile</button>
           </form>
         )}

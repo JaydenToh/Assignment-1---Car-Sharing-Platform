@@ -35,6 +35,12 @@ CREATE TABLE my_db.billing (
     DiscountPercentage DECIMAL(5, 2) NOT NULL
 );
 
+CREATE TABLE my_db.promotions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    min_amount DECIMAL(10, 2) NOT NULL,
+    discount_percentage DECIMAL(5, 2) NOT NULL
+);
+
 INSERT INTO my_db.users (ID, FirstName, LastName, Email, Password, MembershipTier)
 VALUES
     ('01', 'John', 'Tan', 'john@gmail.com', 'drivingcar', 'Basic'),
@@ -69,19 +75,9 @@ UPDATE Billing
 SET MembershipTier = 'VIP', HourlyRate = 5.00, DiscountPercentage = 20
 WHERE ID = 3;
 
-INSERT INTO my_db.billing (ReservationID, Amount, MembershipTier, HourlyRate, DiscountPercentage)
-VALUES
-    (01, 30.00, 'Basic', 10.00, 0.00),
-    (02, 40.00, 'Premium', 8.00, 10.00),
-    (03, 55.00, 'VIP', 5.00, 20.00);
-
-ALTER TABLE my_db.reservations MODIFY COLUMN ID VARCHAR(36);
-
-ALTER TABLE my_db.billing
-DROP FOREIGN KEY billing_ibfk_1;
-
-ALTER TABLE my_db.billing
-ADD CONSTRAINT billing_ibfk_1 FOREIGN KEY (ReservationID) REFERENCES my_db.reservations(ID) ON DELETE CASCADE;
+INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (200, 30.00);
+INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (100, 20.00);
+INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (50, 10.00);
 
 -- Ensure the foreign key relationships are established correctly
 ALTER TABLE my_db.reservations

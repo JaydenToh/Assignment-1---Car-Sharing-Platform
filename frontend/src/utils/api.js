@@ -113,24 +113,34 @@ export async function loginUser(email, password) {
   return response.json();
 }
 
-export async function updateProfile(id, firstName, lastName, email, password) {
+export const updateProfile = async (
+  id,
+  firstName,
+  lastName,
+  email,
+  password
+) => {
   const response = await fetch("http://localhost:8000/update-profile", {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       id,
-      first_name: firstName,
+      first_name: firstName, // Match backend's expected keys
       last_name: lastName,
       email,
       password,
     }),
   });
+
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to update profile");
+    throw new Error(errorData.error || "Failed to update profile");
   }
+
   return response.json();
-}
+};
 
 export async function getMembershipStatus(id) {
   const response = await fetch(

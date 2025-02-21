@@ -55,7 +55,7 @@ func CalculateBilling(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to retrieve billing info", http.StatusInternalServerError)
 		return
 	}
-
+	
 	// Calculate cost, discount, and total
 	rental.Cost = hourlyRate * rental.Hours
 	rental.Discount = rental.Cost * (discountPercentage / 100)

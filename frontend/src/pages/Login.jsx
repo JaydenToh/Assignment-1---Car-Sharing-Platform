@@ -1,10 +1,12 @@
 // src/components/Login.jsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../utils/api";
 import "./Login.css";
 
 function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,6 +17,10 @@ function Login() {
     try {
       const response = await loginUser(form.email, form.password);
       alert(`User logged in: ${response.message}`);
+      // If login is successful, redirect to the Home page
+      if (response.message) {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Error logging in:", error);
       alert(error.message);

@@ -2,9 +2,11 @@
 import React, { useState } from "react";
 import { registerUser } from "../utils/api";
 import "./Signup.css";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 function Signup() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     id: "",
     firstName: "",
@@ -28,6 +30,7 @@ function Signup() {
         form.password
       );
       alert(`User registered: ${response.message}`);
+      navigate("/login");
     } catch (error) {
       console.error("Error registering user:", error);
       alert(error.message);
