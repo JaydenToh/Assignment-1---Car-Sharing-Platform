@@ -102,19 +102,19 @@ These services communicate via RESTful APIs, making the system **scalable**, **m
 - **`vehicles`**: Stores vehicle data (model, status).
 - **`reservations`**: Associates users with vehicles, start/end times, cost details.
 - **`billing`**: Contains membership tiers, hourly rates, discount percentages.
+- **`promotions`**: Discount percentages.
 
 ---
 
-## Setup and Instructions
+# Setup and Instructions
 
-`````markdown
 ## Database Setup
 
-### 1. Database Script
+### Database Script
 
 A file named **`script.sql`** is provided. This script creates the necessary tables and initial data.
 
-````sql
+```sql
 -- Drop existing tables if they exist
 DROP TABLE IF EXISTS my_db.invoices;
 DROP TABLE IF EXISTS my_db.billing;
@@ -172,253 +172,54 @@ CREATE TABLE my_db.reservations (
     FOREIGN KEY (VehicleID) REFERENCES my_db.vehicles(ID) ON DELETE CASCADE
 );
 
--- Create Billing Table
-CREATE TABLE my_db.billing (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    MembershipTier ENUM('Basic', 'Premium', 'VIP') NOT NULL,
-    HourlyRate DECIMAL(10, 2) NOT NULL,
-    DiscountPercentage DECIMAL(5, 2) NOT NULL
-);
-
--- Data for Billing
-INSERT INTO my_db.billing (MembershipTier, HourlyRate, DiscountPercentage)
-VALUES
-    ('Basic', 10.00, 0.00),
-    ('Premium', 15.00, 10.00),
-    ('VIP', 20.00, 20.00);
-
+-- Create Promotions Table
 CREATE TABLE my_db.promotions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     min_amount DECIMAL(10, 2) NOT NULL,
     discount_percentage DECIMAL(5, 2) NOT NULL
 );
 
+-- Data for Promotions
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (200, 30.00);
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (100, 20.00);
 INSERT INTO my_db.promotions (min_amount, discount_percentage) VALUES (50, 10.00);
 
----
-
-```md
-# Project Setup and Usage
-
-## 2. Executing the Script
-
-1. **Launch MySQL** via MySQL Workbench (or your preferred method).
-2. **Create the database**:
-   ```sql
-   CREATE DATABASE my_db;
-   USE my_db;
-   ```
-3. **Run** the `database_setup.sql` script. It will create:
-   - `users`
-   - `vehicles`
-   - `reservations`
-   - `billing`
-
----
-
-## Running the Microservices
-
-### Frontend
-
-1. **Open a new terminal**:
-   ```bash
-   cd frontend
-   ```
-2. **Install dependencies** and **run** the development server:
-   ```bash
-   npm install
-   npm run dev
-   ```
-3. The frontend is now accessible at [http://localhost:5173](http://localhost:5173).
-
-### Backend Services
-
-Each service runs in a **separate terminal**.
-
----
-
-#### User Service
-
-1. **New terminal**:
-   ```bash
-   cd user-service
-   go run main.go
-   ```
-   - Runs on a designated port, e.g., `8002`.
-
----
-
-#### Vehicle Service
-
-1. **Another terminal**:
-   ```bash
-   cd vehicle-service
-   go run main.go
-   ```
-   - Might run on `8003`.
-
----
-
-#### Billing Service
-
-1. **Another terminal**:
-   ```bash
-   cd billing-service
-   go run main.go
-   ```
-   - Typically runs on port `8001`.
-
-> **Note**: Adjust ports as needed based on your `.env` or code settings.
-
----
+```
 
 ## Postman Testing
 
-Once all services are running, use **Postman** to test each endpoint.
+### 🚀 Billing Service
 
-### Billing Service
-
-#### a) Calculate Billing
-
-- **Endpoint**:
-  `POST http://localhost:8001/calculate-billing`
-- **Headers**:
-  ```txt
-  Content-Type: application/json
-  ```
-- **Body (JSON)**:
-  ```json
-  {
-    "membership_tier": "Premium",
-    "start_time": "2025-03-01 10:00:00",
-    "end_time": "2025-03-01 12:00:00"
-  }
-  ```
-- **Expected Response** (`200 OK`):
-  ```json
-  {
-    "membership_tier": "Premium",
-    "start_time": "2025-03-01 10:00:00",
-    "end_time": "2025-03-01 12:00:00",
-    "hours": 2,
-    "cost": 30.0,
-    "discount": 3.0,
-    "total": 27.0
-  }
-  ```
-
-#### b) Estimate Billing
-
-- **Endpoint**:
-  `POST http://localhost:8001/estimate-billing`
-- **Headers**:
-  ```txt
-  Content-Type: application/json
-  ```
-- **Body (JSON)**:
-  ```json
-  {
-    "membership_tier": "Basic",
-    "start_time": "2025-05-10 14:00:00",
-    "end_time": "2025-05-10 16:00:00"
-  }
-  ```
-- **Expected Response** (`200 OK`):
-  ```json
-  {
-    "membership_tier": "Basic",
-    "start_time": "2025-05-10 14:00:00",
-    "end_time": "2025-05-10 16:00:00",
-    "hours": 2,
-    "cost": 20.0,
-    "discount": 0.0,
-    "total": 20.0
-  }
-  ```
-
-#### c) Generate Invoice
-
-- **Endpoint**:
-  `POST http://localhost:8001/generate-invoice`
-- **Headers**:
-  ```txt
-  Content-Type: application/json
-  ```
-- **Body (JSON)**:
-  ```json
-  {
-    "user_email": "john@gmail.com",
-    "user_id": "01",
-    "reservation_id": 1,
-    "total_amount": 27.0
-  }
-  ```
-- **Expected Response** (`200 OK`):
-  ```json
-  {
-    "message": "Invoice sent successfully!"
-  }
-  ```
+Base URL: `http://localhost:8001`
 
 ---
 
-### User Service (Example)
+### 1. Calculate Billing
 
-**Register User**
+- **Method:** `POST`
+- **Endpoint:** `/calculate-billing`
+- **Description:** Calculate the billing amount based on membership tier and rental duration.
 
-- **Endpoint**:
-  `POST http://localhost:8002/register`
-- **Headers**:
-  ```txt
-  Content-Type: application/json
-  ```
-- **Body (JSON)**:
-  ```json
-  {
-    "id": "07",
-    "firstName": "Jane",
-    "lastName": "Doe",
-    "email": "jane@example.com",
-    "password": "secret123",
-    "membershipTier": "Premium"
-  }
-  ```
-- **Expected Response**:
-  A success message or details of the newly created user.
+**Request Headers:**
 
----
+```http
+Content-Type: application/json
 
-### Vehicle Service (Example)
+Request Body:
+{
+  "membership_tier": "Premium",
+  "start_time": "2025-03-01 10:00:00",
+  "end_time": "2025-03-01 12:00:00"
+}
 
-**Get Vehicles**
-
-- **Endpoint**:
-  `GET http://localhost:8003/vehicles`
-- **Expected Response**:
-  A JSON array of vehicles.
-
-**Update Vehicle Status**
-
-- **Endpoint**:
-  `POST http://localhost:8003/update-status`
-- **Headers**:
-  ```txt
-  Content-Type: application/json
-  ```
-- **Body (JSON)**:
-  ```json
-  {
-    "vehicle_id": "03",
-    "status": "booked"
-  }
-  ```
-- **Expected Response**:
-  Confirmation that the vehicle status has been updated.
-
----
-
+Expected Response (200 OK):
+{
+  "membership_tier": "Premium",
+  "start_time": "2025-03-01 10:00:00",
+  "end_time": "2025-03-01 12:00:00",
+  "hours": 2,
+  "cost": 30.0,
+  "discount": 3.0,
+  "total": 27.0
+}
 ```
-````
-`````
