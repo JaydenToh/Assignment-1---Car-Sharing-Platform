@@ -1,3 +1,6 @@
+CREATE DATABASE my_db;
+USE my_db;
+
 CREATE TABLE my_db.users (
     ID VARCHAR(5) NOT NULL PRIMARY KEY,
     FirstName VARCHAR(30),
