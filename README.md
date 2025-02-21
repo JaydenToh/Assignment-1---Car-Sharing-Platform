@@ -2,17 +2,6 @@
 
 Creating a Car Sharing Platform in Go
 
-## Overview
-
-This microservice architecture is designed for a **Billing and Payment Processing** system. It handles:
-
-- **Tier-based pricing and discounts**
-- **Real-time billing calculation**
-- **Secure payment processing**
-- **Invoicing and receipts generation**
-
-These services communicate via RESTful APIs, making the system **scalable**, **maintainable**, and **resilient**.
-
 ---
 
 ## Design Considerations
@@ -24,7 +13,7 @@ These services communicate via RESTful APIs, making the system **scalable**, **m
 
 ### Maintainability
 
-- Separate microservices handle distinct business logic: billing, payments, users, reservations, and vehicles.
+- Separate microservices handle distinct business logic: billing, users, vehicles, and frontend.
 
 ### Security
 
@@ -55,47 +44,6 @@ These services communicate via RESTful APIs, making the system **scalable**, **m
 
 ---
 
-## Microservice Details
-
-### Billing Service
-
-- **Endpoints**:
-  - `POST /calculate-billing`
-  - `POST /estimate-billing`
-  - `POST /generate-invoice`
-- **Usage**: Tier-based pricing, real-time billing calculations, and invoicing.
-
-### Payment Service
-
-- **Endpoints**:
-  - `POST /process-payment`
-  - `POST /refund`
-- **Usage**: Secure transaction handling and refund processing.
-
-### User Service
-
-- **Endpoints**:
-  - `POST /register`
-  - `POST /login`
-  - `GET /user/:id`
-- **Usage**: Manages user accounts, membership tiers, and authentication.
-
-### Reservations Service
-
-- **Endpoints**:
-  - `POST /create-reservation`
-  - `GET /reservations/:userId`
-- **Usage**: Oversees booking details, tying users to vehicles with time ranges.
-
-### Vehicles Service
-
-- **Endpoints**:
-  - `GET /vehicles`
-  - `POST /update-status`
-- **Usage**: Tracks vehicle inventory, model details, and availability status.
-
----
-
 ## Database Design
 
 - **`users`**: Holds user info, including name, email, membership tier, etc.
@@ -107,14 +55,6 @@ These services communicate via RESTful APIs, making the system **scalable**, **m
 ---
 
 # Setup and Instructions
-
-Below is a **complete README.md** file in **one Markdown snippet** that covers:
-
-1. **Database Setup** (with a single fenced code block for the entire SQL script)
-2. **Running the Microservices** (Frontend, User Service, Vehicle Service, Billing Service)
-3. **Postman Testing** for **all features**: user-service, vehicle-service, and billing-service
-
-Simply copy this **entire** snippet into your `README.md`. Each code block will have its own **“copy”** button when viewed on GitHub or a Markdown previewer that supports it.
 
 ---
 
